@@ -5,48 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SILVISH STORE - M&O</title>
     <style>
-        body { margin: 0; background: #0f0f0f; color: #fff; font-family: sans-serif; text-align: center; }
-        header { padding: 20px; font-size: 24px; font-weight: bold; letter-spacing: 2px; border-bottom: 1px solid #222; }
+        body { margin: 0; background: #0a0a0a; color: #fff; font-family: sans-serif; }
+        header { padding: 20px; text-align: center; font-size: 24px; font-weight: bold; border-bottom: 1px solid #222; }
         .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; max-width: 1000px; margin: auto; }
-        .card { background: #1a1a1a; border: 1px solid #333; padding: 15px; border-radius: 8px; }
-        .price { color: #d4af37; font-size: 20px; font-weight: bold; margin: 10px 0; }
-        .btn { background: #fff; color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
+        .price { color: #d4af37; font-size: 18px; margin: 10px 0; }
+        .btn { background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn:hover { background: #d4af37; }
-        #canvas-container { width: 100%; height: 300px; margin-bottom: 10px; }
+        #canvas-container { width: 100%; height: 250px; }
     </style>
-    <!-- Three.js for 3D Models -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-
     <header>SILVISH STORE</header>
-    <p style="color: #888; margin-top: 10px;">M&O Luxury Necklaces - Fixed Price</p>
-
     <div id="canvas-container"></div>
-
     <div class="product-grid" id="store-grid"></div>
-
     <script>
-        // Setup simple 3D interactive preview using Three.js
-        const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 250, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
-        container.appendChild(renderer.domElement);
-
-        const geometry = new THREE.TorusGeometry(1.2, 0.4, 16, 100);
-        const material = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.8 });
+        renderer.setSize(window.innerWidth, 250);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        const geometry = new THREE.TorusGeometry(1, 0.3, 16, 100);
+        const material = new THREE.MeshBasicMaterial({ color: 0xd4af37, wireframe: true });
         const necklaceMesh = new THREE.Mesh(geometry, material);
         scene.add(necklaceMesh);
-
-        const light = new THREE.PointLight(0xffffff, 2, 50);
-        light.position.set(5, 5, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
         camera.position.z = 4;
-
         function animate() {
             requestAnimationFrame(animate);
             necklaceMesh.rotation.x += 0.01;
@@ -54,21 +38,24 @@
             renderer.render(scene, camera);
         }
         animate();
-
-        // 6 Necklace Designs
         const products = [
-            { id: 1, name: "M&O Signature Gold Chain" },
-            { id: 2, name: "Silvish Royal Pendant" },
-            { id: 3, name: "Minimalist Silver Choker" },
-            { id: 4, name: "Eclipse Layered Necklace" },
-            { id: 5, name: "Glimmering Crystal Link" },
-            { id: 6, name: "Vogue Classic Collar" }
+            { id: 1, name: "M&O Signature Gold Chain", price: "350 EGP" },
+            { id: 2, name: "Silvish Royal Pendant", price: "350 EGP" },
+            { id: 3, name: "Minimalist Silver Choker", price: "350 EGP" },
+            { id: 4, name: "Eclipse Layered Necklace", price: "350 EGP" },
+            { id: 5, name: "Glimmering Crystal Link", price: "350 EGP" },
+            { id: 6, name: "Vogue Classic Collar", price: "350 EGP" }
         ];
-
         const grid = document.getElementById('store-grid');
         products.forEach(p => {
             grid.innerHTML += `
                 <div class="card">
                     <h3>${p.name}</h3>
-                    <
-
+                    <div class="price">${p.price}</div>
+                    <button class="btn" onclick="navigator.clipboard.writeText('${p.name}'); alert('Copied: ${p.name}! Redirecting to Instagram...'); window.open('https://www.instagram.com/silvish_store', '_blank');">DM to Order</button>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html> 
