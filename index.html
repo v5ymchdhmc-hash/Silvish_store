@@ -6,13 +6,25 @@
     <title>SILVISH STORE - M&O</title>
     <style>
         body { margin: 0; background: #0a0a0a; color: #fff; font-family: sans-serif; }
-        header { padding: 20px; text-align: center; font-size: 24px; font-weight: bold; border-bottom: 1px solid #222; }
-        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; padding: 20px; max-width: 1000px; margin: auto; }
-        .card { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px; text-align: center; }
-        .price { color: #d4af37; font-size: 18px; margin: 10px 0; }
-        .btn { background: #fff; color: #000; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        header { padding: 25px; text-align: center; font-size: 24px; font-weight: bold; border-bottom: 1px solid #222; letter-spacing: 2px; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 25px; max-width: 1000px; margin: auto; }
+        .card { background: #141414; border: 1px solid #262626; border-radius: 10px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
+        .card img { width: 100%; height: 240px; object-fit: cover; }
+        .card-body { padding: 15px; }
+        h3 { font-size: 16px; margin-bottom: 8px; }
+        .price { color: #d4af37; font-size: 18px; font-weight: bold; margin-bottom: 12px; }
+        .btn { background: #ffffff; color: #000000; border: none; padding: 10px; width: 100%; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn:hover { background: #d4af37; }
-        #canvas-container { width: 100%; height: 250px; }
+        #canvas-container { width: 100%; height: 200px; }
+        
+        /* Modal Style */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: #1a1a1a; border: 1px solid #d4af37; padding: 25px; border-radius: 10px; width: 90%; max-width: 400px; text-align: left; }
+        .modal-content h2 { margin-top: 0; color: #d4af37; font-size: 18px; }
+        .modal-content input, .modal-content textarea { width: 100%; padding: 10px; margin: 8px 0; background: #0a0a0a; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-cancel { background: #333; color: #fff; border: none; padding: 10px; flex: 1; border-radius: 6px; cursor: pointer; }
+        .btn-confirm { background: #d4af37; color: #000; border: none; padding: 10px; flex: 2; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
@@ -20,11 +32,26 @@
     <header>SILVISH STORE</header>
     <div id="canvas-container"></div>
     <div class="product-grid" id="store-grid"></div>
+
+    <!-- Order Modal -->
+    <div class="modal" id="orderModal">
+        <div class="modal-content">
+            <h2 id="modalProductTitle">Order Item</h2>
+            <input type="text" id="custName" placeholder="Full Name" required>
+            <input type="tel" id="custPhone" placeholder="Phone Number (WhatsApp)" required>
+            <textarea id="custAddress" rows="3" placeholder="Delivery Address (City, Street, Building...)" required></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="sendWhatsApp()">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 250, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 200, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, 250);
+        renderer.setSize(window.innerWidth, 200);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
         const geometry = new THREE.TorusGeometry(1, 0.3, 16, 100);
         const material = new THREE.MeshBasicMaterial({ color: 0xd4af37, wireframe: true });
@@ -38,24 +65,62 @@
             renderer.render(scene, camera);
         }
         animate();
+
         const products = [
-            { id: 1, name: "M&O Signature Gold Chain", price: "350 EGP" },
-            { id: 2, name: "Silvish Royal Pendant", price: "350 EGP" },
-            { id: 3, name: "Minimalist Silver Choker", price: "350 EGP" },
-            { id: 4, name: "Eclipse Layered Necklace", price: "350 EGP" },
-            { id: 5, name: "Glimmering Crystal Link", price: "350 EGP" },
-            { id: 6, name: "Vogue Classic Collar", price: "350 EGP" }
+            { name: "M&O Signature Gold Chain", price: "350 EGP", img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=500&q=80" },
+            { name: "Silvish Royal Pendant", price: "350 EGP", img: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=500&q=80" },
+            { name: "Minimalist Silver Choker", price: "350 EGP", img: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=500&q=80" },
+            { name: "Eclipse Layered Necklace", price: "350 EGP", img: "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=500&q=80" },
+            { name: "Glimmering Crystal Link", price: "350 EGP", img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=500&q=80" },
+            { name: "Vogue Classic Collar", price: "350 EGP", img: "https://images.unsplash.com/photo-1611085583191-a3b181a88401?auto=format&fit=crop&w=500&q=80" }
         ];
+
+        let selectedProduct = {};
         const grid = document.getElementById('store-grid');
-        products.forEach(p => {
+        products.forEach((p, index) => {
             grid.innerHTML += `
                 <div class="card">
-                    <h3>${p.name}</h3>
-                    <div class="price">${p.price}</div>
-                    <button class="btn" onclick="navigator.clipboard.writeText('${p.name}'); alert('Copied: ${p.name}! Redirecting to Instagram...'); window.open('https://www.instagram.com/silvish_store', '_blank');">DM to Order</button>
+                    <img src="${p.img}" alt="${p.name}">
+                    <div class="card-body">
+                        <h3>${p.name}</h3>
+                        <div class="price">${p.price}</div>
+                        <button class="btn" onclick="openModal(${index})">Order Now</button>
+                    </div>
                 </div>
             `;
         });
+
+        function openModal(index) {
+            selectedProduct = products[index];
+            document.getElementById('modalProductTitle').innerText = "Order: " + selectedProduct.name + " (" + selectedProduct.price + ")";
+            document.getElementById('orderModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+
+        function sendWhatsApp() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+
+            if (!name || !phone || !address) {
+                alert("Please fill in all your details to complete the order.");
+                return;
+            }
+
+            const message = `*New Order - SILVISH STORE*%0A%0A` +
+                            `*Item:* ${selectedProduct.name}%0A` +
+                            `*Price:* ${selectedProduct.price}%0A` +
+                            `*Name:* ${name}%0A` +
+                            `*Phone:* ${phone}%0A` +
+                            `*Address:* ${address}`;
+
+            const whatsappUrl = `https://wa.me/201060980157?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+            closeModal();
+        }
     </script>
 </body>
 </html> 
